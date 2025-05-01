@@ -146,7 +146,7 @@ ws://host/ws/booking-stream
 **Prerequisites:** Docker, Docker Compose, an Anthropic API key.
 
 ```bash
-git clone https://github.com/joel767443/nexus-scheduler.git
+git clone https://github.com/ykachala/nexus-scheduler.git
 cd nexus-scheduler
 cp .env.example .env
 # Add your ANTHROPIC_API_KEY to .env
@@ -243,8 +243,8 @@ nexus-scheduler/
 
 ## Related
 
-- [saas-multitenant-kit](https://github.com/joel767443/saas-multitenant-kit) — the multi-tenant foundation this can be embedded into  
-- [hookstream](https://github.com/joel767443/hookstream) — handles the webhook delivery for booking events
+- [saas-multitenant-kit](https://github.com/ykachala/saas-multitenant-kit) — the multi-tenant foundation this can be embedded into  
+- [hookstream](https://github.com/ykachala/hookstream) — handles the webhook delivery for booking events
 
 ---
 
