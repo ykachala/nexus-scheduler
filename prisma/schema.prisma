@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id        String    @id @default(uuid())
+  name      String
+  users     User[]
+  bookings  Booking[]
+  webhooks  Webhook[]
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@map("tenants")
+}
+
+model User {
+  id            String               @id @default(uuid())
+  tenantId      String               @map("tenant_id")
+  email         String               @unique
+  passwordHash  String               @map("password_hash")
+  timezone      String               @default("UTC")
+  role          String               @default("user")
+  tenant        Tenant               @relation(fields: [tenantId], references: [id])
+  bookingsOrg   Booking[]            @relation("OrganizerBookings")
+  participantOf BookingParticipant[]
+  refreshTokens RefreshToken[]
+  createdAt     DateTime             @default(now()) @map("created_at")
+  updatedAt     DateTime             @updatedAt @map("updated_at")
+
+  @@index([tenantId])
+  @@map("users")
+}
+
+model Booking {
+  id               String               @id @default(uuid())
+  tenantId         String               @map("tenant_id")
+  organizerId      String               @map("organizer_id")
+  title            String
+  description      String?
+  startTime        DateTime             @map("start_time")
+  endTime          DateTime             @map("end_time")
+  timezone         String               @default("UTC")
+  status           BookingStatus        @default(CONFIRMED)
+  idempotencyKey   String               @unique @map("idempotency_key")
+  confirmationCode String               @unique @map("confirmation_code")
+  isRecurring      Boolean              @default(false) @map("is_recurring")
+  recurrenceRule   String?              @map("recurrence_rule")
+  parentBookingId  String?              @map("parent_booking_id")
+  metadata         Json?
+  tenant           Tenant               @relation(fields: [tenantId], references: [id])
+  organizer        User                 @relation("OrganizerBookings", fields: [organizerId], references: [id])
+  participants     BookingParticipant[]
+  createdAt        DateTime             @default(now()) @map("created_at")
+  updatedAt        DateTime             @updatedAt @map("updated_at")
+
+  @@index([tenantId, startTime])
+  @@index([organizerId])
+  @@index([status])
+  @@map("bookings")
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+  RESCHEDULED
+}
+
+model BookingParticipant {
+  id        String  @id @default(uuid())
+  bookingId String  @map("booking_id")
+  userId    String  @map("user_id")
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id])
+
+  @@unique([bookingId, userId])
+  @@map("booking_participants")
+}
+
+model Webhook {
+  id        String   @id @default(uuid())
+  tenantId  String   @map("tenant_id")
+  url       String
+  events    String[]
+  secret    String
+  isActive  Boolean  @default(true) @map("is_active")
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([tenantId])
+  @@map("webhooks")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
