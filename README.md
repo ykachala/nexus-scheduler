@@ -137,6 +137,7 @@ ws://host/ws/booking-stream
 "Do I have anything on Thursday afternoon?"
 "Move my 10am tomorrow to the same time next week"
 "Schedule a 1-hour call with John for sometime next Monday"
+"Am I free this Thursday between 2 and 4?"
 ```
 
 ---
